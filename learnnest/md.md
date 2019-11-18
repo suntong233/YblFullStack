@@ -159,9 +159,7 @@
     yarn --version
     
     // 数据库 
-    npm i --save nestjs-typegoose
-    yarn add nestjs-typegoose --save
-    yarn add @typegoose/typegoose --save
+    yarn add nestjs-typegoose @typegoose/typegoose --save
 
     yarn add class-validator class-transformer   // 管道验证
 ```
