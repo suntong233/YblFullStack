@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   const options = new DocumentBuilder()
       .setTitle('YBLfullstack博客后台管理api')
       .setDescription('admin接口文档')

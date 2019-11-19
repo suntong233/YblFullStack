@@ -2,6 +2,8 @@
 
 node + vue 全栈开发个人博客
 
+* 启动数据库 mongod --dbpath d:\data\db
+
 # Journal
 
 ## 服务端
@@ -116,6 +118,7 @@ node + vue 全栈开发个人博客
 ## 安装接口文档
 
 ```js
+@yarn
     yarn add @nestjs/swagger swagger-ui-express 
 
     // 添加配置
@@ -181,6 +184,7 @@ node + vue 全栈开发个人博客
 * 模型建完建模块
 
 ```js
+@nest
     nest g mo -p admin courses
     nest g co -p admin courses
 
@@ -209,9 +213,198 @@ node + vue 全栈开发个人博客
 ## 接口创建完成 接下来写后台ui
 
 ```js
+@add
     // 使用typescript开发vue
     // 在admin同级 
     vue create admin
 
-    vue add typescript
+    vue add typescript  // ts
+    vue add element   // element-ui
+    vue add router   // vue-router
+    yarn serve   // 启动项目
+
+    // 为方便开发 安装element的插件  element ui snippets
+```
+
+* ts组件写法
+```html
+    <script lang="ts">
+        import { Component, Vue } from 'vue-property-decorator'
+        @Component({
+
+        })
+
+        export default class App extends Vue {
+
+        }
+    </script>
+```
+
+* ts声明接口代码提示
+
+```ts
+    const routes: RouteConfig[] = [
+        {
+            path: '/',
+            component: Main,
+            children: [
+                {name: 'home', path: '/', component: Home}
+            ]
+        }
+    ]
+
+```
+
+## ts中使用axios
+
+```ts
+@yarn
+    yarn add axios @types/axios
+    
+    // main.ts
+    import axios from 'axios'
+
+    Vue.prototype.$axios = axios.create({
+    baseURL: 'http://localhost:3000'
+    })
+
+    // nest跨域 main.ts
+    app.enableCors()
+
+
+    // ts接口 消除错误提示 我们在vue的prototype上添加了$axios
+    // src下新建文件 custom-vue.d.ts
+    
+    import { AxiosInstance } from "axios";
+
+    declare module 'vue/types/vue' {
+        interface Vue {
+            $axios: AxiosInstance
+        }
+    }
+    // f1 启动vscode命令窗口 reload重载
+```
+
+## 新建与编辑的路由路径
+
+```ts
+    const routes: RouteConfig[] = [
+        {
+            path: '/',
+            component: Main,
+            children: [
+            { name: 'home', path: '/', component: () => import('../views/Home.vue') },
+            { name: 'course-list', path: '/courses/list', component: () => import('../views/courses/CourseList.vue') },
+            { name: 'course-edit', path: '/courses/edit/:id', component: () => import('../views/courses/CourseEdit.vue'), props: true },
+            { name: 'course-create', path: '/courses/create', component: () => import('../views/courses/CourseEdit.vue') }
+            ]
+        }
+    ]
+
+    // 接受参数 @prop
+    @Prop(String) id!:string
+    // 计算属性
+    get isCreate(){
+        return !this.id
+    }
+```
+
+## vue-ele-form 动态生成表单
+
+```js
+@yarn 
+    yarn add vue-ele-form
+    // main.ts全局注册
+    import EleForm from 'vue-ele-form'
+    Vue.use(EleForm)
+
+    // 新建package.d.ts 声明引入的模块
+    declare module 'vue-ele-form' {
+        export const install: () => any
+    }
+
+    // eleform
+
+    <ele-form
+    :form-data="data"
+    :form-desc="fields"
+    >
+    </ele-form>
+
+    data = {};
+    fields = {
+        name: {label: '名称', type: 'input'},
+        cover: {label: '课程封面图', type: 'input'}
+    };
+```
+
+## 编辑和新建页面
+
+```js
+    // 根据是否是创建还是编辑页面执行请求
+    !this.isCreate && this.fetch()
+
+    // 动态添加post或put请求
+    async submit(data:any){
+        const url = this.isCreate ? `courses` : `courses/${this.id}`
+        const method = this.isCreate ? 'post' : 'put'
+        let res = await this.$axios[method](url, data)
+        if(res){
+        this.$message.success('保存成功')
+        this.data = {}
+        this.$router.go(-1)
+        }
+    }
+
+    // 删除
+    async remove(id: string){
+        try {
+        await this.$confirm('确认要删除吗？')
+        } catch(e) {
+        return
+        }
+        let res = await this.$axios.delete(`courses/${id}`)
+        if(res){
+        this.$message.success('删除成功')
+        this.fetch()
+        }
+    }
+```
+
+## 使用AVUE快速开发crud接口
+
+```js
+@yarn 
+    yarn add @smallwei/avue
+
+    // 配置 plugins 下新建avue.ts
+    import Vue from 'vue'
+    import Avue from '@smallwei/avue'
+    import '@smallwei/avue/lib/index.css'
+
+    Vue.use(Avue)
+
+```
+
+```js
+    // 前端配置数据分离到服务端
+    @Get('option')
+    @ApiOperation({title: '服务端返回前端crud配置'})
+    option() {
+        return {
+            title: '课程管理',
+            column: [
+                {prop: 'name', label: '课程名称'},
+                {prop: 'cover', label: '课程封面图'}
+            ]
+        }
+    }
+    // 通过服务端返回的配置动态地给前端提供接口
+```
+
+## 分页
+
+```js
+
+    
 ```
